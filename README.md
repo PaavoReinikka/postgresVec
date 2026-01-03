@@ -45,8 +45,6 @@ You can enter the running container with
 ```
 docker exec -it postgresql_database bash # or psql directly to check the database
 ```
-```
-```
 
 Within the container, you might want to run `printenv` command to check the environment variables.
 
