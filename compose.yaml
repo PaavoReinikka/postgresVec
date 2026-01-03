@@ -1,0 +1,49 @@
+services:
+  database:
+    container_name: postgresql_database
+    image: reinikp2/pgvector-database:v1 #alt: postgres:17.0 + pgvector
+    restart: unless-stopped
+    env_file:
+      - project.env
+    ports:
+      - 5431:5432 # (check for conflicts wrt. host)
+    environment:
+      - TZ=Europe/Helsinki  # Set the timezone
+    volumes:
+      - ./data-preparation/data:/data
+      - ./pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  database-migrations:
+    image: flyway/flyway:10
+    env_file:
+      - project.env
+    depends_on:
+      database:
+        condition: service_started
+    volumes:
+      - ./database-migrations:/flyway/sql
+      # - ./data-preparation/data:/data
+    command: -connectRetries=60 -baselineOnMigrate=true migrate
+      
+  data-preparation:
+    build:
+      context: ./data-preparation/scripts  # Here be Dockerfile
+    volumes:
+      - ./data-preparation/data:/data
+      - ./data-preparation/scripts:/scripts
+    working_dir: /scripts # this is already done in the Dockerfile (remove for production)
+    env_file:
+      - ./project.env
+    entrypoint: >
+      bash -c "
+      ./retrieve_porssisahko_update.sh
+      #tail -f /dev/null # for debugging -- keeps the container running after the script finishes
+      "
+    profiles:
+      - data-preparation
+
