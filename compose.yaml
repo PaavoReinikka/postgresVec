@@ -10,8 +10,8 @@ services:
     environment:
       - TZ=Europe/Helsinki  # Set the timezone
     volumes:
-      - ./data-preparation/data:/data
       - ./pgdata:/var/lib/postgresql/data
+      #- ./data-preparation/data:/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready"]
       interval: 10s
@@ -41,8 +41,9 @@ services:
       - ./project.env
     entrypoint: >
       bash -c "
-      ./retrieve_porssisahko_update.sh
-      #tail -f /dev/null # for debugging -- keeps the container running after the script finishes
+      chmod +x /scripts/*.sh &&
+      ./entrypoint.sh #&&
+      #tail -f /dev/null #NOTE: this is for debugging purposes only
       "
     profiles:
       - data-preparation
