@@ -27,7 +27,7 @@ services:
         condition: service_started
     volumes:
       - ./database-migrations:/flyway/sql
-      # - ./data-preparation/data:/data
+      # - ./data-preparation/data:/data # for bulk loading, if needed
     command: -connectRetries=60 -baselineOnMigrate=true migrate
       
   data-preparation:
